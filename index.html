@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>LOOKTURA · твой образ уже рядом</title>
+  <meta name="description" content="Витрина настоящих вещей из магазинов рядом. Свайпай, бронируй примерку и забирай в магазине в тот же день. Москва, осень 2026." />
+  <meta name="theme-color" content="#F4F0E8" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="LOOKTURA · твой образ уже рядом" />
+  <meta property="og:description" content="Витрина настоящих вещей из магазинов рядом. Свайпай, бронируй примерку и забирай в тот же день." />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:image" content="assets/p3.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="home.css?v=106" />
+
+  <script type="importmap">
+  {"imports":{
+    "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }}
+  </script>
+</head>
+<body>
+  <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
+
+  <a class="skip" href="#content">К содержанию</a>
+
+  <!-- soft aurora backdrop -->
+  <div class="aura" aria-hidden="true"></div>
+
+  <!-- brand logo (Andrei's original mark), defined once, reused via <use> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="lk-logo" viewBox="0 0 220 220" fill="none">
+      <path d="M33 25H81.5L106.5 49V125.5H162.5L186 149V194H57L33 169.5V25Z" fill="black"/>
+      <path d="M186 194H57L33 169.5V25H81.5L106.5 49V125.5H162.5L186 149V194ZM81.5 25V169.5M81.5 169.5H33M81.5 169.5H162.5L186 194" stroke="black"/>
+      <rect x="82" y="133" width="72" height="10" fill="#86F8FE"/>
+      <rect x="40" y="32" width="33" height="63" fill="#EB74F4"/>
+      <path d="M52.2578 103C52.0919 103.469 52 103.974 52 104.5C52 106.985 54.0147 109 56.5 109C58.9853 109 61 106.985 61 104.5C61 103.974 60.9081 103.469 60.7422 103H73V161H60.9717C60.9898 160.836 61 160.669 61 160.5C61 158.015 58.9853 156 56.5 156C54.0147 156 52 158.015 52 160.5C52 160.669 52.0102 160.836 52.0283 161H40V103H52.2578ZM46.5 142C44.0147 142 42 144.015 42 146.5C42 148.985 44.0147 151 46.5 151C48.9853 151 51 148.985 51 146.5C51 144.015 48.9853 142 46.5 142ZM66.5 142C64.0147 142 62 144.015 62 146.5C62 148.985 64.0147 151 66.5 151C68.9853 151 71 148.985 71 146.5C71 144.015 68.9853 142 66.5 142ZM56.5 128C54.0147 128 52 130.015 52 132.5C52 134.985 54.0147 137 56.5 137C58.9853 137 61 134.985 61 132.5C61 130.015 58.9853 128 56.5 128ZM46.5 113C44.0147 113 42 115.015 42 117.5C42 119.985 44.0147 122 46.5 122C48.9853 122 51 119.985 51 117.5C51 115.015 48.9853 113 46.5 113ZM66.5 113C64.0147 113 62 115.015 62 117.5C62 119.985 64.0147 122 66.5 122C68.9853 122 71 119.985 71 117.5C71 115.015 68.9853 113 66.5 113Z" fill="white"/>
+      <rect x="82" y="151" width="72" height="10" fill="#86F8FE"/>
+    </symbol>
+  </svg>
+
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="nav__pill glass">
+      <a class="nav__logo" href="#top" aria-label="LOOKTURA — на главную">
+        <svg class="mark" aria-hidden="true" focusable="false"><use href="#lk-logo"/></svg>
+        <span class="nav__word">LOOKTURA</span>
+      </a>
+      <nav class="nav__links" aria-label="Разделы">
+        <a href="#how" data-link>Как это работает</a>
+        <a href="#boutiques" data-link>Бутики</a>
+      </nav>
+      <a class="btn nav__cta" href="#final" data-link>Записаться</a>
+      <button class="nav__burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main id="content">
+
+    <!-- HERO: phone ring carousel (pinned, scroll rotates the ring) -->
+    <section class="hero" id="top">
+      <div class="hero__pin" id="heroPin">
+        <div class="ring__glow" id="ringGlow" aria-hidden="true"></div>
+        <div class="ring" id="ring" aria-hidden="true"></div>
+
+        <div class="hero__copy">
+          <h1 class="hero__brand">LOOKTURA</h1>
+          <p class="hero__sub">Переосмысляем шоппинг</p>
+        </div>
+
+        <div class="ringcap" id="ringCap" aria-live="polite">
+          <span class="ringcap__t" id="ringCapT"></span>
+          <span class="ringcap__s" id="ringCapS"></span>
+        </div>
+        <div class="dots" id="ringDots" aria-hidden="true"></div>
+
+        <noscript><p class="hero__sub" style="text-align:center">Включите JavaScript, чтобы покрутить витрину экранов.</p></noscript>
+      </div>
+    </section>
+
+    <!-- 2 · DEFINITION -->
+    <section class="define">
+      <p class="define__t rv">Не каталог и не доставка. Витрина настоящих вещей из магазинов рядом: видишь, бронируешь примерку, забираешь в тот же день.</p>
+    </section>
+
+    <!-- 3 · HOW IT WORKS -->
+    <section class="how" id="how">
+      <div class="wrap">
+        <div class="sec__head rv">
+          <p class="eyebrow">Как это работает</p>
+          <h2 class="sec__title">Три шага, и вещь твоя</h2>
+        </div>
+        <div class="steps">
+          <article class="step rv">
+            <span class="step__k">Свайпай</span>
+            <p class="step__p">Лента реальных вещей из бутиков рядом. Вправо: нравится. Влево: дальше.</p>
+          </article>
+          <article class="step rv" data-d="1">
+            <span class="step__k">Бронируй</span>
+            <p class="step__p">Закрепляешь вещь возвратным депозитом 5%. Она ждёт тебя в магазине, приходишь когда удобно.</p>
+          </article>
+          <article class="step rv" data-d="2">
+            <span class="step__k">Меряй</span>
+            <p class="step__p">Примеряешь вживую. Платишь, только если берёшь. Всё в тот же день.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · ЛЕНТА -->
+    <section class="lenta" id="lenta">
+      <div class="wrap">
+        <div class="sec__head rv">
+          <p class="eyebrow">Лента</p>
+          <h2 class="sec__title">Листаешь ленту.<br>Всё в ней можно потрогать.</h2>
+          <p class="sec__lead">Это не вдохновляющие картинки из интернета, которые потом нигде не найти. Каждая вещь в ленте есть в наличии, в конкретном магазине, в твоём районе.</p>
+          <p class="sec__lead">Понравилась: бронируешь примерку прямо из карточки. До шести фото, размеры, цвета, цена и наличие. Без бесконечных вкладок и переписок в директе «а есть мой размер?».</p>
+        </div>
+      </div>
+      <div class="feed rv" role="list" aria-label="Примеры вещей из ленты">
+        <img src="assets/p3.jpg" alt="Образ из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p5.jpg" alt="Образ из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p1.jpg" alt="Вещь из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p7.jpg" alt="Деталь вещи из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p2.jpg" alt="Вещь из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p8.jpg" alt="Образ из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p4.jpg" alt="Вещь из ленты" loading="lazy" role="listitem" />
+        <img src="assets/p6.jpg" alt="Образ из ленты" loading="lazy" role="listitem" />
+      </div>
+      <p class="feed__cap">Вправо: в мэтчи. Влево: мимо. Передумал: вернуть одним движением.</p>
+    </section>
+
+    <!-- 5 · БУТИКИ -->
+    <section class="boutiques" id="boutiques">
+      <div class="wrap boutiques__grid">
+        <div class="boutiques__copy rv">
+          <p class="eyebrow">Магазины</p>
+          <h2 class="sec__title">Бутики Москвы,<br>а не склад маркетплейса</h2>
+          <p class="sec__lead">Независимые шоурумы, локальные дизайнеры, небольшие бутики. Те, у кого одна-две точки и вещи, которых не встретишь в общих каталогах.</p>
+          <p class="sec__lead">Мы собираем их по районам и показываем, что есть рядом с тобой. Захочешь обойти несколько за раз — приложение соберёт пеший маршрут.</p>
+          <p class="boutiques__amp">Покупаешь напрямую у магазина, по его цене. Без наценки сервиса и посредников между тобой и вещью.</p>
+        </div>
+        <aside class="boutiques__card glass rv" data-d="1" aria-label="Что собираем">
+          <div class="bgroup">
+            <h4>Что собираем</h4>
+            <div class="chips">
+              <span class="chip">Шоурумы</span>
+              <span class="chip">Локальные дизайнеры</span>
+              <span class="chip">Бутики у дома</span>
+              <span class="chip">Концепт-сторы</span>
+            </div>
+          </div>
+          <div class="bgroup">
+            <h4>По районам</h4>
+            <div class="chips">
+              <span class="chip">Центр</span>
+              <span class="chip">Север</span>
+              <span class="chip">Запад</span>
+              <span class="chip">Юг</span>
+              <span class="chip">Восток</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 6 · ПОЧЕМУ ОФЛАЙН -->
+    <section class="why" id="why">
+      <div class="wrap">
+        <div class="sec__head rv">
+          <p class="eyebrow">Почему офлайн</p>
+          <h2 class="sec__title">Примерил, забрал.<br>Возвращать нечего.</h2>
+          <p class="sec__lead">Онлайн приучил заказывать пачками и половину отправлять назад. Курьеры, пункты выдачи, ожидание возврата на карту.</p>
+          <p class="sec__lead">Когда вещь рядом и её видно вживую, всё проще. Меряешь, чувствуешь ткань, смотришь на себе при нормальном свете. Берёшь то, что правда нравится, и носишь сегодня же.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 · ЧЕСТНО О СТАРТЕ -->
+    <section class="start" id="start">
+      <div class="wrap">
+        <div class="start__card glass rv">
+          <p class="eyebrow">Где мы сейчас</p>
+          <h2 class="sec__title">Мы только начинаем.<br>И не скрываем этого.</h2>
+          <p class="sec__lead">LOOKTURA запускается в Москве осенью 2026. Сейчас подключаем первые магазины и доводим приложение до ума.</p>
+          <p class="sec__lead">Никаких накрученных отзывов и цифр, которых пока нет. Если идея откликается, оставь почту: позовём в первую волну и спросим, чего не хватает. Те, кто придёт в начале, увидят, как сервис складывается, и повлияют на него.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · FAQ -->
+    <section class="faq" id="faq">
+      <div class="wrap">
+        <div class="sec__head rv">
+          <h2 class="sec__title">Частые вопросы</h2>
+        </div>
+        <div class="faq__list">
+          <div class="faq__item open rv">
+            <button class="faq__q" aria-expanded="true">Сколько стоит примерка?<span class="faq__ico" aria-hidden="true"></span></button>
+            <div class="faq__a"><div class="faq__a-in"><p>Сама примерка бесплатная. Чтобы вещь подождала тебя в магазине, оставляешь возвратный депозит 5% (от 149&nbsp;₽). Пришёл мерить: он вернётся полностью.</p></div></div>
+          </div>
+          <div class="faq__item rv">
+            <button class="faq__q" aria-expanded="false">А если вещь не подойдёт?<span class="faq__ico" aria-hidden="true"></span></button>
+            <div class="faq__a"><div class="faq__a-in"><p>Ничего не теряешь. Меряешь вживую и платишь, только если берёшь. Не подошло: уходишь, депозит возвращается.</p></div></div>
+          </div>
+          <div class="faq__item rv">
+            <button class="faq__q" aria-expanded="false">Это маркетплейс?<span class="faq__ico" aria-hidden="true"></span></button>
+            <div class="faq__a"><div class="faq__a-in"><p>Нет. Покупаешь прямо в магазине, по его цене, без наценки сервиса. Мы просто приводим тебя к вещи, которая уже рядом.</p></div></div>
+          </div>
+          <div class="faq__item rv">
+            <button class="faq__q" aria-expanded="false">Когда запуск?<span class="faq__ico" aria-hidden="true"></span></button>
+            <div class="faq__a"><div class="faq__a-in"><p>Осенью 2026. Оставь почту в раннем доступе: напишем за пару недель до старта и позовём первым.</p></div></div>
+          </div>
+          <div class="faq__item rv">
+            <button class="faq__q" aria-expanded="false">В каких городах?<span class="faq__ico" aria-hidden="true"></span></button>
+            <div class="faq__a"><div class="faq__a-in"><p>Стартуем в Москве, тут больше всего бутиков и локальных брендов. Дальше посмотрим на другие города.</p></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 · FINAL CTA -->
+    <section class="final" id="final">
+      <div class="wrap">
+        <div class="final__card glass rv">
+          <p class="eyebrow">Готов начать?</p>
+          <h2 class="final__title">Свайпни и забери.</h2>
+          <p class="final__sub">Запускаемся <b>осенью 2026</b>. Оставь почту, позовём за пару недель до старта.</p>
+          <form class="wait" id="waitlist" novalidate>
+            <div class="wait__row">
+              <input class="wait__input" id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="твоя почта" aria-label="Электронная почта" required />
+              <button class="btn btn--lg wait__btn" type="submit">Записаться</button>
+            </div>
+            <p class="wait__msg" id="waitMsg" role="status" aria-live="polite"></p>
+            <p class="wait__consent">Нажимая «Записаться», ты соглашаешься с <a href="privacy.html">политикой конфиденциальности</a>.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOR STORES -->
+    <section class="forstores">
+      <div class="wrap">
+        <a class="forstores__card glass rv" href="partners.html">
+          <div class="forstores__txt">
+            <p class="eyebrow">Магазинам и брендам</p>
+            <h2 class="forstores__t">Витрина и поток визитов — без комиссий</h2>
+            <p class="forstores__p">Цифровая витрина в приложении и целевые визиты покупателей. 0% комиссии с продаж, первый месяц бесплатно.</p>
+          </div>
+          <span class="btn btn--lg forstores__btn">Стать партнёром →</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot__grid">
+        <div class="foot__brand">
+          <a class="nav__logo" href="#top" aria-label="LOOKTURA — на главную">
+            <svg class="mark" aria-hidden="true"><use href="#lk-logo"/></svg>
+            <span class="nav__word">LOOKTURA</span>
+          </a>
+          <p class="foot__tag">Витрина настоящих вещей из магазинов рядом. Свайпай, бронируй, забирай в тот же день.</p>
+        </div>
+        <div class="foot__col">
+          <h4>Разделы</h4>
+          <a href="#how" data-link>Как это работает</a>
+          <a href="#lenta" data-link>Лента</a>
+          <a href="#boutiques" data-link>Бутики</a>
+          <a href="#why" data-link>Почему офлайн</a>
+          <a href="#faq" data-link>Вопросы</a>
+        </div>
+        <div class="foot__col">
+          <h4>Компания</h4>
+          <a href="partners.html">Магазинам</a>
+          <a href="privacy.html">Конфиденциальность</a>
+          <a href="mailto:andrei.khitrov34@gmail.com">Написать нам</a>
+        </div>
+        <a class="btn btn--dark foot__cta" href="#final" data-link>Записаться</a>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 LOOKTURA · ИП Хитров · Москва</span>
+        <a href="mailto:andrei.khitrov34@gmail.com">andrei.khitrov34@gmail.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MOBILE MENU -->
+  <div class="menu" id="menu" aria-hidden="true">
+    <nav class="menu__nav" aria-label="Меню">
+      <a href="#how" data-link>Как это работает</a>
+      <a href="#lenta" data-link>Лента</a>
+      <a href="#boutiques" data-link>Бутики</a>
+      <a href="#why" data-link>Почему офлайн</a>
+      <a href="#faq" data-link>Вопросы</a>
+    </nav>
+    <a class="btn btn--lg menu__cta" href="#final" data-link>Записаться</a>
+  </div>
+
+  <script>window.LK_CONFIG = { endpoint: "", email: "andrei.khitrov34@gmail.com" };</script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="home.js?v=108"></script>
+</body>
+</html>

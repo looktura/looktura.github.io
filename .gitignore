@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+
+# Build output — regenerate with: bash build.sh
+dist/
+node_modules/
+
+# Claude Code / agent tooling
+.claude/
+.agents/
+skills-lock.json
+
+# Internal working docs — copy & pricing strategy, not for the public site
+LOOKTURA_лендинг_текст.md
+LOOKTURA_магазинам_текст.md
+
+# Local experiments / scratch pages
+lab.html
+diorama-lab.html
+store-lab.html
+
+# Legacy source from the previous site version (kept locally, not committed)
+app.js
+styles.css
+sections.css
+partners.css
+partners.js
+archive_v1/

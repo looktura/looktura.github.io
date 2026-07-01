@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LOOKTURA — партнёрам · доведём покупателя до вашей двери</title>
+<meta name="description" content="LOOKTURA для магазинов: цифровая витрина и целевые визиты покупателей. 0% комиссии с продаж, первый месяц бесплатно, цена раннего партнёра — навсегда." />
+<meta name="theme-color" content="#F4F0E8" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="LOOKTURA — партнёрам" />
+<meta property="og:description" content="Доведём покупателя до вашей двери. Витрина и целевые визиты без комиссий с продаж." />
+<meta property="og:locale" content="ru_RU" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --lav:#9E8BAF; --lav-deep:#6E5A82; --mint:#99F2F5; --pink:#ED8CED;
+    --ink:#211C28; --ink-soft:#473F54;
+    --glass:rgba(255,255,255,.86); --glass-line:rgba(255,255,255,.94);
+    --shadow:0 24px 64px rgba(120,95,155,.24);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:#CFE3F4;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+
+  /* fixed 3D diorama background */
+  #stage{position:fixed;inset:0;z-index:0}
+  /* tall rail gives the page its scroll length */
+  #rail{position:relative;z-index:1;height:520vh;pointer-events:none}
+
+  /* fixed UI overlay on top of the diorama */
+  #ui{position:fixed;inset:0;z-index:2;pointer-events:none}
+
+  .topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(18px,4vw,52px)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;font-size:15px;color:var(--lav-deep)}
+  .brand-logo{width:30px;height:30px;display:block;filter:drop-shadow(0 4px 10px rgba(120,95,155,.2))}
+  .back{pointer-events:auto;font-size:13px;font-weight:600;color:var(--lav-deep);text-decoration:none;opacity:.8;
+    background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    padding:8px 14px;border-radius:999px;border:1px solid var(--glass-line)}
+  .back:hover{opacity:1}
+
+  /* thin journey progress bar */
+  .bar{position:absolute;left:0;top:0;height:3px;width:100%;background:transparent}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lav),var(--pink));border-radius:0 3px 3px 0;
+    transition:width .12s linear;box-shadow:0 0 12px rgba(237,140,237,.6)}
+
+  /* narrative panels — glass cards, vertically centred on the left */
+  .panel{position:absolute;top:50%;left:clamp(20px,6vw,88px);transform:translateY(-46%) translateY(12px);
+    width:min(516px,90vw);opacity:0;transition:opacity .2s ease, transform .3s cubic-bezier(.2,.7,.2,1);
+    will-change:opacity,transform}
+  .card{pointer-events:auto;background:linear-gradient(155deg,rgba(255,255,255,.93),rgba(255,255,255,.78));
+    backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);
+    border:1px solid rgba(255,255,255,.85);border-radius:26px;padding:36px 40px;box-shadow:0 28px 70px rgba(120,95,155,.2)}
+  .card::before{content:"";display:block;width:44px;height:4px;border-radius:4px;margin-bottom:20px;
+    background:linear-gradient(90deg,var(--lav),var(--pink))}
+  .eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lav-deep);margin:0 0 14px}
+  .panel h1,.panel h2{margin:0 0 14px;font-weight:800;letter-spacing:-.03em;line-height:1.02;color:var(--ink)}
+  .panel h1{font-size:clamp(30px,4.6vw,46px)}
+  .panel h2{font-size:clamp(32px,4.6vw,50px)}
+  .panel p{margin:0;font-size:clamp(17px,1.7vw,21px);line-height:1.5;color:var(--ink-soft);font-weight:450}
+
+  /* the scroll hint at the very start */
+  .hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;
+    font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--lav-deep);opacity:.85;
+    transition:opacity .4s ease}
+  .hint svg{width:20px;height:20px;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+  /* arrival form */
+  .form-card{display:flex;flex-direction:column;gap:12px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12px;font-weight:600;color:var(--lav-deep);letter-spacing:.02em}
+  .field input{font:inherit;font-size:15px;padding:12px 15px;border-radius:13px;border:1px solid rgba(110,90,130,.22);
+    background:rgba(255,255,255,.7);color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+  .field input:focus{border-color:var(--lav);box-shadow:0 0 0 4px rgba(158,139,175,.18)}
+  .submit{margin-top:4px;font:inherit;font-weight:700;font-size:15.5px;color:#fff;border:0;cursor:pointer;
+    padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,var(--lav),var(--lav-deep));
+    box-shadow:0 12px 26px rgba(110,90,130,.34);transition:transform .15s,box-shadow .2s}
+  .submit:hover{transform:translateY(-1px);box-shadow:0 16px 32px rgba(110,90,130,.42)}
+  .note{margin:2px 0 0;font-size:12.5px;color:var(--ink-soft);opacity:.85}
+  .ok{display:none;font-size:14.5px;color:var(--lav-deep);font-weight:600;padding:6px 0}
+
+  /* fallback / loading */
+  #fallback{position:fixed;inset:0;z-index:3;display:grid;place-items:center;background:#CFE3F4;
+    transition:opacity .6s ease;pointer-events:none}
+  #fallback.hide{opacity:0}
+  .spin{width:34px;height:34px;border-radius:50%;border:3px solid rgba(110,90,130,.25);border-top-color:var(--lav-deep);
+    animation:rot .9s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+
+  @media (max-width:760px){
+    .panel{top:auto;bottom:26px;left:50%;transform:translateX(-50%) translateY(18px);width:min(440px,92vw)}
+    .panel--hero{top:64px;bottom:auto}
+    .card{padding:24px 24px;border-radius:22px}
+    .panel--hero h1{font-size:clamp(32px,9vw,44px)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .panel{transition:opacity .3s ease}
+    .hint svg{animation:none}
+  }
+
+  .panel-cta{display:inline-block;margin-top:18px;text-decoration:none;font-weight:700;font-size:14.5px;color:#fff;
+    padding:11px 20px;border-radius:12px;background:linear-gradient(135deg,var(--lav),var(--lav-deep));
+    box-shadow:0 10px 24px rgba(110,90,130,.32);transition:transform .15s}
+  .panel-cta:hover{transform:translateY(-1px)}
+
+  /* starting hero — up in the clouds: logo + gradient LOOKTURA wordmark + shimmering "партнёрам" */
+  .panel--hero{top:clamp(58px,10vh,156px);left:50%;width:min(860px,94vw)}
+  .hero-block{text-align:center;padding:30px 20px;
+    background:radial-gradient(56% 70% at 50% 46%, rgba(255,255,255,.5), rgba(255,255,255,0) 76%)}
+  .hero-logo{width:66px;height:66px;display:block;margin:0 auto 20px;filter:drop-shadow(0 12px 26px rgba(120,95,155,.26))}
+  .hero-brand{margin:0;font-family:"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,Inter,sans-serif;
+    font-weight:800;font-size:clamp(70px,15vw,176px);line-height:.88;letter-spacing:-.032em;
+    background:linear-gradient(102deg,#EB74F4 0%,#9A77EE 44%,#46AEE8 80%,#86F8FE 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  .hero-partners{margin:2px 0 14px;font-weight:800;font-size:clamp(22px,3.4vw,42px);letter-spacing:.02em;
+    background:linear-gradient(100deg,#EB74F4,#9A77EE,#46AEE8,#86F8FE,#EB74F4);background-size:300% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+    animation:shimmer 4.5s linear infinite}
+  @keyframes shimmer{to{background-position:300% 0}}
+  .panel--hero .hero-tagline{margin:2px auto 24px;font-weight:600;font-size:clamp(19px,2.2vw,30px);
+    line-height:1.25;letter-spacing:-.015em;text-align:center;color:#2A2431;text-shadow:0 1px 18px rgba(255,255,255,.92)}
+  .hero-read{display:inline-flex;color:var(--lav-deep);opacity:.8}
+  .hero-read svg{width:26px;height:26px;animation:bob 1.6s ease-in-out infinite}
+
+  /* ===== detailed content below the journey — clean ivory/ink (client-page look) ===== */
+  #content{position:relative;z-index:4;
+    --ink:#111010;--ink-soft:#7A746C;--muted:#7A746C;--lav:#9E8BAF;--cta:#6E5A82;--pink:#ED8CED;--cyan:#99F2F5;
+    --hair:rgba(17,16,16,.07);--line:rgba(17,16,16,.10);
+    --card-shadow:0 1px 2px rgba(17,16,16,.04);--card-hover:0 22px 50px rgba(17,16,16,.09);
+    --ease:cubic-bezier(.16,1,.3,1);--r:22px;--r-lg:30px;
+    color:var(--ink);background:#F4F0E8;border-radius:34px 34px 0 0;box-shadow:0 -24px 60px rgba(17,16,16,.08)}
+  #content .eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--cta);margin:0 0 16px}
+  .wrap{width:min(1180px,90vw);margin:0 auto}
+  .csec{padding:clamp(80px,12vh,140px) 0}
+  .chead{max-width:760px;margin:0 auto clamp(40px,6vw,56px);text-align:center}
+  .chead .eyebrow{display:block}
+  .ctitle{font-size:clamp(30px,4.6vw,52px);font-weight:800;letter-spacing:-.025em;line-height:1.05;margin:0 0 14px}
+  .clead{font-size:clamp(16px,1.6vw,19px);line-height:1.6;color:var(--muted);margin-top:18px}
+  .hook-title{font-size:clamp(34px,5.4vw,60px);line-height:1.06}
+  #content .grad{background:linear-gradient(110deg,var(--pink),var(--cta) 45%,var(--lav) 72%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .rv.in{opacity:1;transform:none}
+  .rv[data-d="1"]{transition-delay:.08s}.rv[data-d="2"]{transition-delay:.16s}.rv[data-d="3"]{transition-delay:.24s}.rv[data-d="4"]{transition-delay:.32s}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important;transition:none}}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden}
+  .stat{background:#fff;padding:30px 26px;transition:background .25s var(--ease)}
+  .stat:hover{background:#FBF9F4}
+  .stat__n{font-size:clamp(28px,3.4vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--ink)}
+  .stat__n.acc{background:linear-gradient(110deg,var(--pink),var(--cta) 45%,var(--lav) 72%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat__l{margin-top:12px;font-size:13.5px;line-height:1.45;color:var(--muted)}
+
+  .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .bcard{background:#fff;border:1px solid var(--hair);border-radius:var(--r);padding:30px 28px;box-shadow:var(--card-shadow);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+  .bcard:hover{transform:translateY(-4px);box-shadow:var(--card-hover)}
+  .bcard__ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;margin-bottom:16px;color:var(--cta);background:rgba(158,139,175,.12)}
+  .bcard__ic svg{width:22px;height:22px}
+  .bcard h3{margin:0 0 9px;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+  .bcard p{margin:0;font-size:14.5px;line-height:1.55;color:var(--muted)}
+
+  .shots{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .shot{margin:0;background:#fff;border:1px solid var(--hair);border-radius:var(--r);padding:12px;box-shadow:var(--card-shadow);text-align:center;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+  .shot:hover{transform:translateY(-3px);box-shadow:var(--card-hover)}
+  .shot img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:14px;display:block;background:#EDE9E1}
+  .shot figcaption{font-size:13px;font-weight:600;color:var(--muted);padding:12px 4px 6px}
+
+  .pswitch{display:flex;justify-content:center;margin:0 auto 30px}
+  .pswitch__in{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:rgba(17,16,16,.05)}
+  .pswitch button{font:inherit;font-size:14px;font-weight:600;border:0;cursor:pointer;padding:9px 18px;border-radius:999px;color:var(--cta);background:transparent;transition:background .2s,color .2s,box-shadow .2s}
+  .pswitch button.active{background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(17,16,16,.08)}
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+  .plan{position:relative;background:#fff;border:1px solid var(--hair);border-radius:var(--r-lg);padding:32px 28px;box-shadow:var(--card-shadow);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+  .plan:not(.plan--feat):hover{transform:translateY(-4px);box-shadow:var(--card-hover)}
+  .plan--feat{border:1px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(120deg,var(--pink),var(--lav) 50%,var(--cyan)) border-box;box-shadow:0 24px 60px rgba(110,90,130,.16);transform:translateY(-6px)}
+  .plan__tag{position:absolute;top:-12px;left:28px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#fff;background:linear-gradient(120deg,var(--pink),var(--cta) 55%,var(--cyan));padding:5px 12px;border-radius:999px}
+  .plan__name{font-size:17px;font-weight:700;color:var(--ink)}
+  .plan__vol{font-size:13.5px;color:var(--muted);margin-top:3px}
+  .plan__price{margin:16px 0 4px;display:flex;align-items:baseline;gap:6px}
+  .plan__num{font-size:clamp(30px,4vw,40px);font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+  .plan__per{font-size:14px;color:var(--muted);font-weight:600}
+  .plan__old{font-size:12.5px;color:var(--muted);min-height:18px}
+  .plan ul{list-style:none;margin:18px 0 22px;padding:0;display:flex;flex-direction:column;gap:10px}
+  .plan li{font-size:14px;line-height:1.4;padding-left:26px;position:relative;color:var(--ink-soft)}
+  .plan li::before{content:"✓";position:absolute;left:0;top:0;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--cta);background:rgba(158,139,175,.16)}
+  .plan__cta{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:14.5px;padding:12px;border-radius:13px;border:1px solid var(--hair);color:var(--cta);transition:background .2s,transform .15s}
+  .plan__cta:hover{background:rgba(158,139,175,.08)}
+  .plan--feat .plan__cta{border:0;color:#fff;background:var(--cta)}
+  .plan--feat .plan__cta:hover{background:#5d4a70;transform:translateY(-1px)}
+  .pnote{max-width:820px;margin:28px auto 0;text-align:center;font-size:14px;line-height:1.6;color:var(--muted)}
+
+  .foto{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(40px,5vw,60px);align-items:center}
+  .foto .ctitle{text-align:left}
+  .fpacks{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+  .fpack{display:flex;align-items:center;justify-content:space-between;gap:14px;background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;padding:22px 4px;transition:background .2s var(--ease)}
+  .fpack:hover{background:#FBF9F4}
+  .fpack b{font-size:17px;font-weight:700;color:var(--ink)}
+  .fpack span{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
+  .fpack__pr{font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chips span{font-size:12.5px;font-weight:600;color:var(--muted);background:transparent;border:1px solid var(--line);padding:7px 13px;border-radius:999px}
+
+  .faqs{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+  .faqi{background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;overflow:hidden;box-shadow:none}
+  .faqi__q{width:100%;text-align:left;font:inherit;font-size:17px;font-weight:600;color:var(--ink);background:none;border:0;cursor:pointer;padding:24px 4px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:opacity .2s}
+  .faqi__q:hover{opacity:.65}
+  .faqi__q::after{content:"";position:relative;flex:none;width:14px;height:14px;margin:0;border:0;transform:none;
+    background:linear-gradient(var(--cta),var(--cta)) center/14px 1.6px no-repeat,linear-gradient(var(--cta),var(--cta)) center/1.6px 14px no-repeat}
+  .faqi.open .faqi__q::after{background:linear-gradient(var(--cta),var(--cta)) center/14px 1.6px no-repeat}
+  .faqi__a{max-height:0;overflow:hidden;transition:max-height .3s var(--ease)}
+  .faqi__a p{margin:0;padding:0 4px 24px;font-size:16px;line-height:1.6;color:var(--muted);max-width:64ch}
+
+  .apply{display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(32px,5vw,48px);align-items:start}
+  .apply__aside .ctitle{text-align:left}
+  .apply__list{list-style:none;margin:24px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}
+  .apply__list li{padding-left:30px;position:relative}
+  .apply__list li::before{content:"";position:absolute;left:0;top:5px;width:14px;height:14px;border-radius:50%;background:var(--lav)}
+  .apply__list b{display:block;font-size:16px;color:var(--ink)}
+  .apply__list span{font-size:14.5px;line-height:1.5;color:var(--muted)}
+  .fcard{background:#fff;border:1px solid var(--hair);border-radius:var(--r-lg);padding:clamp(28px,3.4vw,40px);box-shadow:var(--card-hover)}
+  .fcard .field{margin-bottom:14px}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .fcard label{display:block;font-size:13.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .fcard input,.fcard select,.fcard textarea{width:100%;font:inherit;font-size:15px;padding:12px 14px;border-radius:13px;border:1px solid var(--line);background:#fff;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+  .fcard textarea{min-height:84px;resize:vertical}
+  .fcard input:hover,.fcard select:hover,.fcard textarea:hover{border-color:rgba(17,16,16,.16)}
+  .fcard input:focus,.fcard select:focus,.fcard textarea:focus{border-color:var(--lav);box-shadow:0 0 0 4px rgba(110,90,130,.16)}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);margin:2px 0 16px}
+  .consent input{width:auto;margin-top:2px;accent-color:var(--cta)}
+  .cok{display:none;margin-top:14px;font-size:14.5px;font-weight:600;color:var(--cta)}
+
+  #content .cbtn{display:inline-block;text-decoration:none;font-weight:700;font-size:15.5px;color:#fff;border:0;cursor:pointer;
+    background:var(--cta);border-radius:999px;padding:14px 28px;box-shadow:0 12px 28px rgba(110,90,130,.28);transition:transform .15s var(--ease),box-shadow .2s,background .2s}
+  #content .cbtn:hover{background:#5d4a70;transform:translateY(-1px);box-shadow:0 16px 34px rgba(110,90,130,.38)}
+  #content .cbtn:active{transform:translateY(1px) scale(.985)}
+  .final-card{text-align:center;background:var(--ink);color:#fff;border:0;border-radius:var(--r-lg);padding:clamp(44px,6vw,72px);box-shadow:0 30px 70px rgba(17,16,16,.22);position:relative;overflow:hidden}
+  .final-card .eyebrow{color:#C9B9D9}
+  .final-card h2{font-size:clamp(30px,4.4vw,50px);font-weight:800;margin:8px 0 12px;letter-spacing:-.025em;color:#fff}
+  .final-card p{font-size:16px;line-height:1.6;color:rgba(255,255,255,.72);margin:0 auto 26px;max-width:540px}
+  .final-card .cbtn{background:#fff;color:var(--ink)}
+  .final-card .cbtn:hover{background:#F4F0E8}
+  .cfoot{text-align:center;padding:40px 18px 56px;font-size:13px;color:var(--muted)}
+  .cfoot a{color:var(--cta)}
+
+  @media (max-width:920px){
+    .bgrid,.plans{grid-template-columns:1fr 1fr}
+    .stats,.shots{grid-template-columns:1fr 1fr}
+    .foto,.apply{grid-template-columns:1fr;gap:28px}
+  }
+  @media (max-width:560px){
+    .bgrid,.plans,.stats,.shots,.frow{grid-template-columns:1fr}
+  }
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="lk-logo" viewBox="0 0 220 220" fill="none">
+    <path d="M33 25H81.5L106.5 49V125.5H162.5L186 149V194H57L33 169.5V25Z" fill="#241F2B"/>
+    <path d="M186 194H57L33 169.5V25H81.5L106.5 49V125.5H162.5L186 149V194ZM81.5 25V169.5M81.5 169.5H33M81.5 169.5H162.5L186 194" stroke="#241F2B"/>
+    <rect x="82" y="133" width="72" height="10" fill="#86F8FE"/>
+    <rect x="40" y="32" width="33" height="63" fill="#EB74F4"/>
+    <path d="M52.2578 103C52.0919 103.469 52 103.974 52 104.5C52 106.985 54.0147 109 56.5 109C58.9853 109 61 106.985 61 104.5C61 103.974 60.9081 103.469 60.7422 103H73V161H60.9717C60.9898 160.836 61 160.669 61 160.5C61 158.015 58.9853 156 56.5 156C54.0147 156 52 158.015 52 160.5C52 160.669 52.0102 160.836 52.0283 161H40V103H52.2578ZM46.5 142C44.0147 142 42 144.015 42 146.5C42 148.985 44.0147 151 46.5 151C48.9853 151 51 148.985 51 146.5C51 144.015 48.9853 142 46.5 142ZM66.5 142C64.0147 142 62 144.015 62 146.5C62 148.985 64.0147 151 66.5 151C68.9853 151 71 148.985 71 146.5C71 144.015 68.9853 142 66.5 142ZM56.5 128C54.0147 128 52 130.015 52 132.5C52 134.985 54.0147 137 56.5 137C58.9853 137 61 134.985 61 132.5C61 130.015 58.9853 128 56.5 128ZM46.5 113C44.0147 113 42 115.015 42 117.5C42 119.985 44.0147 122 46.5 122C48.9853 122 51 119.985 51 117.5C51 115.015 48.9853 113 46.5 113ZM66.5 113C64.0147 113 62 115.015 62 117.5C62 119.985 64.0147 122 66.5 122C68.9853 122 71 119.985 71 117.5C71 115.015 68.9853 113 66.5 113Z" fill="white"/>
+    <rect x="82" y="151" width="72" height="10" fill="#86F8FE"/>
+  </symbol></svg>
+  <div id="stage"></div>
+  <div id="rail"></div>
+
+  <div id="ui">
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="topbar">
+      <div class="brand"><svg class="brand-logo" viewBox="0 0 220 220" aria-hidden="true"><use href="#lk-logo"/></svg> LOOKTURA</div>
+      <a class="back" href="index.html">← на главную</a>
+    </div>
+
+    <article class="panel panel--hero" data-at="0">
+      <div class="hero-block">
+        <svg class="hero-logo" viewBox="0 0 220 220" aria-hidden="true"><use href="#lk-logo"/></svg>
+        <h1 class="hero-brand">LOOKTURA</h1>
+        <p class="hero-partners">партнёрам</p>
+        <p class="hero-tagline">Доведём покупателя до вашей&nbsp;двери</p>
+        <span class="hero-read" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </span>
+      </div>
+    </article>
+
+    <article class="panel" data-at="0.26">
+      <div class="card">
+        <h2>Дело не в товаре</h2>
+        <p>Вещи у вас хорошие. Просто человек проходит мимо и не знает, что вы здесь.</p>
+      </div>
+    </article>
+
+    <article class="panel" data-at="0.42">
+      <div class="card">
+        <h2>Теперь вас видно</h2>
+        <p>LOOKTURA показывает магазин тем, кто прямо сейчас ищет одежду рядом. Витрина, каталог, лента: всё как в онлайне, только дорога ведёт к вам.</p>
+      </div>
+    </article>
+
+    <article class="panel" data-at="0.58">
+      <div class="card">
+        <h2>Увидел, забронировал, пришёл</h2>
+        <p>Покупатель откладывает вещь в пару касаний и доходит за ней. Без звонков «а мой размер есть?».</p>
+      </div>
+    </article>
+
+    <article class="panel" data-at="0.74">
+      <div class="card">
+        <h2><span class="dot"></span>Маршрут прямо до двери</h2>
+        <p>Приложение ведёт его по городу к вашему входу. Не к соседям, к вам.</p>
+      </div>
+    </article>
+
+    <article class="panel" data-at="0.91" id="cta">
+      <div class="card">
+        <h2>Ваш магазин в LOOKTURA</h2>
+        <p>Витрина, каталог, бронь и маршрут до самой двери. Ниже: как это устроено и сколько стоит.</p>
+        <a class="panel-cta" href="#more">Подробнее ↓</a>
+      </div>
+    </article>
+
+  </div>
+
+  <main id="content">
+    <section class="csec" id="more" style="padding-top:clamp(74px,10vw,128px)">
+      <div class="wrap">
+        <div class="chead" style="margin-bottom:clamp(48px,7vw,72px)">
+          <p class="eyebrow">LOOKTURA для магазинов</p>
+          <h2 class="ctitle hook-title">Покупатель уже выбрал.<br><span class="grad">Доведём его до вашей двери.</span></h2>
+          <p class="clead">Витрина, бронь и маршрут — а деньги за товар идут вам напрямую.</p>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="stat__n acc">0%</div><div class="stat__l">наша комиссия с ваших продаж</div></div>
+          <div class="stat"><div class="stat__n">1&nbsp;месяц</div><div class="stat__l">бесплатно, без риска</div></div>
+          <div class="stat"><div class="stat__n">от&nbsp;5&nbsp;000&nbsp;₽</div><div class="stat__l">в месяц; для первых 50 цена закрепляется навсегда</div></div>
+          <div class="stat"><div class="stat__n">5%</div><div class="stat__l">возвратный депозит за бронь — меньше неявок</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="csec" id="why" style="padding-top:0">
+      <div class="wrap">
+        <div class="chead">
+          <p class="eyebrow">Зачем это магазину</p>
+          <h2 class="ctitle">Витрина и визиты. Без склада и комиссий.</h2>
+          <p class="clead">Покупка остаётся офлайн, деньги за товар идут напрямую вам, мимо платформы. Вы получаете цифровую витрину и визиты людей, которые уже выбрали вашу вещь.</p>
+        </div>
+        <div class="bgrid">
+          <article class="bcard">
+            <div class="bcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
+            <h3>0% комиссии с продаж</h3><p>Деньги за товар идут вам напрямую. Вы платите за подписку, а не процент с каждой продажи.</p>
+          </article>
+          <article class="bcard">
+            <div class="bcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+            <h3>Целевые визиты</h3><p>Человек приходит за конкретной вещью. Размер, цвет и наличие он подтвердил заранее.</p>
+          </article>
+          <article class="bcard">
+            <div class="bcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <h3>Меньше неявок</h3><p>За бронь покупатель вносит возвратный депозит. Пришёл: депозит вернулся ему. Не пришёл: остаётся вам.</p>
+          </article>
+          <article class="bcard">
+            <div class="bcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+            <h3>Кабинет магазина</h3><p>Каталог, слоты примерки, заявки и аналитика по визитам. Всё в одном окне.</p>
+          </article>
+          <article class="bcard">
+            <div class="bcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0 4 4m-4-4-4 4"/><path d="M5 20h14"/></svg></div>
+            <h3>Каталог за минуты</h3><p>Добавите вручную, загрузите CSV или подключите товароучёт: МойСклад, 1С, Эвотор.</p>
+          </article>
+          <article class="bcard">
+            <div class="bcard__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.2"/></svg></div>
+            <h3>Услуга «ФОТО»</h3><p>Нет своих хороших фото? Снимем ассортимент в едином стиле ленты. Подробнее ниже.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="csec" id="showcase" style="padding-top:0">
+      <div class="wrap">
+        <div class="chead">
+          <p class="eyebrow">Магазин в приложении</p>
+          <h2 class="ctitle">Как вас увидят покупатели</h2>
+          <p class="clead">Карточка магазина, каталог, бронь и маршрут. Всё ведёт человека к вам в офлайн.</p>
+        </div>
+        <div class="shots">
+          <figure class="shot"><img src="assets/screens/store.jpg" alt="Страница магазина" loading="lazy"><figcaption>Страница магазина</figcaption></figure>
+          <figure class="shot"><img src="assets/screens/catalog.jpg" alt="Каталог товаров" loading="lazy"><figcaption>Каталог товаров</figcaption></figure>
+          <figure class="shot"><img src="assets/screens/booking.jpg" alt="Бронь вещи" loading="lazy"><figcaption>Бронь вещи</figcaption></figure>
+          <figure class="shot"><img src="assets/screens/route.jpg" alt="Маршрут к двери" loading="lazy"><figcaption>Маршрут к двери</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="csec" id="pricing">
+      <div class="wrap">
+        <div class="chead">
+          <p class="eyebrow">Тарифы</p>
+          <h2 class="ctitle">Прозрачная подписка по объёму каталога</h2>
+          <p class="clead">Помесячно, без скидок и скрытых платежей. Первые 50 магазинов получают цену «раннего партнёра» и держат её навсегда.</p>
+        </div>
+        <div class="pswitch"><div class="pswitch__in"><button data-price="early" class="active">Ранний партнёр</button><button data-price="public">Прайс с 2027</button></div></div>
+        <div class="plans">
+          <article class="plan">
+            <div class="plan__name">S · Старт</div><div class="plan__vol">до 50 товаров</div>
+            <div class="plan__price"><span class="plan__num" data-early="5&nbsp;000" data-public="6&nbsp;900">5&nbsp;000</span><span class="plan__per">₽/мес</span></div>
+            <div class="plan__old" data-show="early">Прайс с 2027 — <b>6&nbsp;900&nbsp;₽</b></div>
+            <div class="plan__old" data-show="public" hidden>Для раннего партнёра — <b>5&nbsp;000&nbsp;₽</b></div>
+            <ul><li>Кабинет магазина и каталог</li><li>Слоты примерки и брони</li><li>Добавление вручную и по CSV</li><li>Первый месяц бесплатно</li></ul>
+            <a class="plan__cta" href="#apply">Оставить заявку</a>
+          </article>
+          <article class="plan plan--feat">
+            <span class="plan__tag">Оптимальный</span>
+            <div class="plan__name">M · Основной</div><div class="plan__vol">до 150 товаров</div>
+            <div class="plan__price"><span class="plan__num" data-early="10&nbsp;000" data-public="12&nbsp;900">10&nbsp;000</span><span class="plan__per">₽/мес</span></div>
+            <div class="plan__old" data-show="early">Прайс с 2027 — <b>12&nbsp;900&nbsp;₽</b></div>
+            <div class="plan__old" data-show="public" hidden>Для раннего партнёра — <b>10&nbsp;000&nbsp;₽</b></div>
+            <ul><li>Всё из тарифа «Старт»</li><li>Больше товаров в каталоге</li><li>Приоритетная поддержка</li><li>Статус раннего партнёра — навсегда</li></ul>
+            <a class="plan__cta" href="#apply">Оставить заявку</a>
+          </article>
+          <article class="plan">
+            <div class="plan__name">L · Расширенный</div><div class="plan__vol">свыше 150 товаров</div>
+            <div class="plan__price"><span class="plan__num" data-early="15&nbsp;000" data-public="19&nbsp;900">15&nbsp;000</span><span class="plan__per">₽/мес</span></div>
+            <div class="plan__old" data-show="early">Прайс с 2027 — <b>19&nbsp;900&nbsp;₽</b></div>
+            <div class="plan__old" data-show="public" hidden>Для раннего партнёра — <b>15&nbsp;000&nbsp;₽</b></div>
+            <ul><li>Всё из тарифа «Основной»</li><li>До 3 точек продаж</li><li>Приоритет интеграций товароучёта</li><li>Большой каталог без ограничений</li></ul>
+            <a class="plan__cta" href="#apply">Оставить заявку</a>
+          </article>
+        </div>
+        <p class="pnote">Бронь — это возвратный депозит <b>5% от цены товара</b> (мин. 149&nbsp;₽), его вносит покупатель. При визите на примерку депозит возвращается ему, удерживается только при неявке. Деньги за сам товар всегда идут напрямую магазину.</p>
+      </div>
+    </section>
+
+    <section class="csec" id="foto" style="padding-top:0">
+      <div class="wrap foto">
+        <div>
+          <p class="eyebrow">Услуга «ФОТО»</p>
+          <h2 class="ctitle">Нет хороших фото?<br>Снимем за вас</h2>
+          <p class="clead" style="margin:0">Выездная съёмка. Фотограф и модели снимут ваш ассортимент в едином стиле ленты: вертикаль 4:5, фирменный фон, до 6 кадров на вещь. Кадры сами лягут на карточки по артикулу.</p>
+          <div class="chips"><span>Вертикаль 4:5</span><span>Фирменный фон</span><span>До 6 кадров на вещь</span><span>Выезд в магазин</span></div>
+        </div>
+        <div class="fpacks">
+          <div class="fpack"><div><b>Lite</b><span>полсмены · до 30 артикулов</span></div><div class="fpack__pr">34&nbsp;900&nbsp;₽</div></div>
+          <div class="fpack"><div><b>Standard</b><span>смена · до 60 артикулов</span></div><div class="fpack__pr">59&nbsp;900&nbsp;₽</div></div>
+          <div class="fpack"><div><b>Max</b><span>плотная смена · до 80 артикулов</span></div><div class="fpack__pr">77&nbsp;900&nbsp;₽</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="csec" id="faq" style="padding-top:0">
+      <div class="wrap">
+        <div class="chead"><h2 class="ctitle">Коротко о главном</h2></div>
+        <div class="faqs">
+          <div class="faqi open"><button class="faqi__q">Берёте комиссию с продаж?</button><div class="faqi__a"><p>Нет. Деньги за товар всегда идут вам напрямую, мимо платформы. Зарабатываем на подписке и сервисе брони, а не на проценте с продаж, как маркетплейсы.</p></div></div>
+          <div class="faqi"><button class="faqi__q">Когда старт?</button><div class="faqi__a"><p>Пилот летом 2026, публичный запуск в Москве осенью. Сейчас набираем первые 50 магазинов: они получают цену раннего партнёра навсегда и влияют на то, каким станет сервис.</p></div></div>
+          <div class="faqi"><button class="faqi__q">Как магазину подключиться?</button><div class="faqi__a"><p>Оставьте заявку на этой странице. Проведём онбординг, поможем собрать каталог (вручную, по CSV или через интеграцию с МойСклад, 1С, Эвотор) и при желании отснимем ассортимент по услуге «ФОТО». Первый месяц бесплатно.</p></div></div>
+          <div class="faqi"><button class="faqi__q">Что входит в подписку?</button><div class="faqi__a"><p>Кабинет магазина, каталог, слоты примерки и брони, заявки и базовая аналитика по визитам. Тариф зависит только от объёма каталога, без скрытых платежей.</p></div></div>
+          <div class="faqi"><button class="faqi__q">Как бронь защищает от неявок?</button><div class="faqi__a"><p>Покупатель вносит возвратный депозит 5% от цены вещи (мин. 149&nbsp;₽). Пришёл на примерку: депозит вернулся ему. Не пришёл и не отменил заранее: остаётся вам, за отложенную вещь и зарезервированное время.</p></div></div>
+          <div class="faqi"><button class="faqi__q">Нужны свои фотографии товара?</button><div class="faqi__a"><p>Желательно, но не обязательно. Нет хороших фото: снимем ваш ассортимент в едином стиле ленты по услуге «ФОТО».</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="csec" id="apply" style="padding-top:0">
+      <div class="wrap apply">
+        <div class="apply__aside">
+          <p class="eyebrow">Заявка на подключение</p>
+          <h2 class="ctitle">Подключите свой магазин</h2>
+          <p class="clead" style="margin:0">Оставьте заявку. Подключим магазин, поможем собрать каталог и настроить первые брони.</p>
+          <ul class="apply__list">
+            <li><b>Ответим лично, без ботов</b><span>Пишет живой человек, не автоворонка.</span></li>
+            <li><b>Персональный онбординг</b><span>Поможем с каталогом, слотами и первыми бронями.</span></li>
+            <li><b>Первый месяц бесплатно</b><span>Подключайтесь без риска и оцените поток визитов.</span></li>
+          </ul>
+        </div>
+        <form class="fcard" id="applyForm" novalidate>
+          <div class="field"><label for="company">Название магазина *</label><input id="company" name="company" type="text" placeholder="Например, No Wave Store" autocomplete="organization" required></div>
+          <div class="frow">
+            <div class="field"><label for="name">Ваше имя *</label><input id="name" name="name" type="text" autocomplete="name" required></div>
+            <div class="field"><label for="phone">Телефон *</label><input id="phone" name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></div>
+          </div>
+          <div class="field"><label for="email">Email *</label><input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required></div>
+          <div class="frow">
+            <div class="field"><label for="points">Количество точек</label><select id="points" name="points"><option>1 точка</option><option>2 точки</option><option>3 и больше</option></select></div>
+            <div class="field"><label for="volume">Объём каталога</label><select id="volume" name="volume"><option>до 50 товаров</option><option>до 150 товаров</option><option>свыше 150 товаров</option></select></div>
+          </div>
+          <div class="field"><label for="message">Сообщение</label><textarea id="message" name="message" placeholder="Пара слов о магазине или вопрос — по желанию"></textarea></div>
+          <label class="consent"><input type="checkbox" id="consent" name="consent" required><span>Соглашаюсь на обработку персональных данных и условия обработки заявки.</span></label>
+          <button class="cbtn" type="submit" style="width:100%">Отправить заявку</button>
+          <p class="cok" id="cok">Спасибо! Открываем почту с готовым письмом — отправьте его, и мы свяжемся в течение дня.</p>
+        </form>
+      </div>
+    </section>
+
+    <section class="csec" style="padding-top:0;padding-bottom:clamp(96px,14vh,150px)">
+      <div class="wrap">
+        <div class="final-card">
+          <p class="eyebrow" style="display:block">Первый месяц бесплатно</p>
+          <h2>Войдите в первые 50 магазинов</h2>
+          <p>Цена раннего партнёра закрепится за вами навсегда. Подключайтесь без риска и оцените поток целевых визитов из вашего района.</p>
+          <a class="cbtn" href="#apply">Оставить заявку</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="cfoot">© 2026 LOOKTURA · ИП Хитров · Москва · <a href="mailto:andrei.khitrov34@gmail.com">andrei.khitrov34@gmail.com</a></div>
+  </main>
+
+  <div id="fallback"><div class="spin"></div></div>
+
+<script type="module">
+  import { createDiorama } from './diorama.js?v=story4';
+
+  const clamp01 = (t) => Math.max(0, Math.min(1, t));
+  const stage = document.getElementById('stage');
+  const rail = document.getElementById('rail');
+  const fallback = document.getElementById('fallback');
+  const barfill = document.getElementById('barfill');
+  const reduced = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';  // start at the top, every time
+  window.scrollTo(0, 0);
+
+  const d = createDiorama(stage, { reducedMotion: reduced, damping: 0.12, posDamp: 0.12, sway: 0.018 });
+  d.ready.then(() => {
+    fallback.classList.add('hide');
+    setTimeout(() => fallback.remove(), 700);
+  });
+
+  const panels = [...document.querySelectorAll('.panel')].map((el) => ({
+    el, at: +el.dataset.at, form: el.id === 'cta', hero: el.classList.contains('panel--hero'),
+  }));
+
+  function paint(p) {
+    d.setProgress(p);
+    barfill.style.width = (p * 100).toFixed(1) + '%';
+    const mobile = matchMedia('(max-width:760px)').matches;
+    for (const pan of panels) {
+      let o;
+      if (pan.form) {
+        o = clamp01((p - (pan.at - 0.10)) / 0.05);           // fade in near the end, then hold
+      } else {
+        o = clamp01(1 - (Math.abs(p - pan.at) - 0.072) / 0.006); // hold full across the segment; CSS does a quick crossfade
+      }
+      pan.el.style.opacity = o.toFixed(3);
+      pan.el.style.transform = pan.hero
+        ? `translateX(-50%) translateY(${(1 - o) * -10}px)`  // hero: pinned top-centre
+        : (mobile
+          ? `translateX(-50%) translateY(${(1 - o) * 14}px)`
+          : `translateY(-46%) translateY(${(1 - o) * 14}px)`);
+      pan.el.style.pointerEvents = (o > 0.6 ? 'auto' : 'none');
+    }
+  }
+
+  function progressFromScroll() {
+    const max = rail.offsetHeight - window.innerHeight;
+    return clamp01(window.scrollY / Math.max(1, max));
+  }
+
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      paint(progressFromScroll());
+      // pause the 3D once the content has scrolled up over it (saves the GPU)
+      if (window.scrollY > rail.offsetHeight - window.innerHeight * 0.5) d.pause(); else d.play();
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => { d.resize(); paint(progressFromScroll()); });
+
+  // gentle parallax from pointer
+  window.addEventListener('pointermove', (e) => {
+    d.setMouse((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1);
+  });
+
+  paint(progressFromScroll());
+
+  // pricing toggle
+  document.querySelectorAll('.pswitch button').forEach((b) => b.addEventListener('click', () => {
+    const mode = b.dataset.price;
+    document.querySelectorAll('.pswitch button').forEach((x) => x.classList.toggle('active', x === b));
+    document.querySelectorAll('.plan__num').forEach((n) => { n.innerHTML = n.dataset[mode]; });
+    document.querySelectorAll('.plan__old').forEach((o) => { o.hidden = (o.dataset.show !== mode); });
+  }));
+
+  // FAQ accordion
+  document.querySelectorAll('.faqi').forEach((item) => {
+    const a = item.querySelector('.faqi__a');
+    if (item.classList.contains('open')) a.style.maxHeight = a.scrollHeight + 'px';
+    item.querySelector('.faqi__q').addEventListener('click', () => {
+      const open = item.classList.toggle('open');
+      a.style.maxHeight = open ? a.scrollHeight + 'px' : '0';
+    });
+  });
+
+  // application form -> mailto fallback (no backend yet)
+  const form = document.getElementById('applyForm');
+  const cok = document.getElementById('cok');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const val = (id) => (form[id] && form[id].value || '').trim();
+    if (!val('company') || !val('name') || !val('phone') || !val('email') || !form.consent.checked) { form.reportValidity?.(); return; }
+    const subj = encodeURIComponent('Заявка магазина в LOOKTURA — ' + val('company'));
+    const body = encodeURIComponent(
+      `Магазин: ${val('company')}\nИмя: ${val('name')}\nТелефон: ${val('phone')}\nEmail: ${val('email')}\n` +
+      `Точек: ${val('points')}\nОбъём каталога: ${val('volume')}\nСообщение: ${val('message')}`);
+    window.location.href = `mailto:andrei.khitrov34@gmail.com?subject=${subj}&body=${body}`;
+    cok.style.display = 'block';
+  });
+
+  // scroll-reveal: tag content blocks (cascade the card grids), then observe
+  (() => {
+    const tag = (sel, stagger) => document.querySelectorAll('#content ' + sel).forEach((el, i) => {
+      el.classList.add('rv'); if (stagger) el.dataset.d = String((i % 4) + 1);
+    });
+    tag('.chead'); tag('.stats'); tag('.pswitch'); tag('.pnote'); tag('.foto'); tag('.faqs'); tag('.apply'); tag('.final-card');
+    tag('.bcard', true); tag('.shot', true); tag('.plan', true);
+    const items = document.querySelectorAll('#content .rv');
+    if (reduced) { items.forEach((el) => el.classList.add('in')); return; }
+    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } },
+      { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+    items.forEach((el) => io.observe(el));
+  })();
+</script>
+</body>
+</html>
