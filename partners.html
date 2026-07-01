@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LOOKTURA — партнёрам · доведём покупателя до вашей двери</title>
+<title>LOOKTURA — партнёрам</title>
 <meta name="description" content="LOOKTURA для магазинов: цифровая витрина и целевые визиты покупателей. 0% комиссии с продаж, первый месяц бесплатно, цена раннего партнёра — навсегда." />
 <meta name="theme-color" content="#F4F0E8" />
 <meta property="og:type" content="website" />
@@ -92,9 +92,11 @@
   @keyframes rot{to{transform:rotate(360deg)}}
 
   @media (max-width:760px){
-    .panel{top:auto;bottom:26px;left:50%;transform:translateX(-50%) translateY(18px);width:min(440px,92vw)}
+    .panel{top:72px;bottom:auto;left:50%;transform:translateX(-50%) translateY(14px);width:min(392px,90vw)}
     .panel--hero{top:64px;bottom:auto}
-    .card{padding:24px 24px;border-radius:22px}
+    .card{padding:20px 22px;border-radius:20px}
+    .panel:not(.panel--hero) h2{font-size:clamp(22px,6vw,27px);margin-bottom:9px}
+    .panel:not(.panel--hero) p{font-size:clamp(14px,3.8vw,15.5px);line-height:1.46}
     .panel--hero h1{font-size:clamp(32px,9vw,44px)}
   }
   @media (prefers-reduced-motion:reduce){
@@ -116,13 +118,11 @@
     font-weight:800;font-size:clamp(70px,15vw,176px);line-height:.88;letter-spacing:-.032em;
     background:linear-gradient(102deg,#EB74F4 0%,#9A77EE 44%,#46AEE8 80%,#86F8FE 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
-  .hero-partners{margin:2px 0 14px;font-weight:800;font-size:clamp(22px,3.4vw,42px);letter-spacing:.02em;
+  .hero-partners{margin:2px 0 22px;font-weight:800;font-size:clamp(22px,3.4vw,42px);letter-spacing:.02em;
     background:linear-gradient(100deg,#EB74F4,#9A77EE,#46AEE8,#86F8FE,#EB74F4);background-size:300% 100%;
     -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
     animation:shimmer 4.5s linear infinite}
   @keyframes shimmer{to{background-position:300% 0}}
-  .panel--hero .hero-tagline{margin:2px auto 24px;font-weight:600;font-size:clamp(19px,2.2vw,30px);
-    line-height:1.25;letter-spacing:-.015em;text-align:center;color:#2A2431;text-shadow:0 1px 18px rgba(255,255,255,.92)}
   .hero-read{display:inline-flex;color:var(--lav-deep);opacity:.8}
   .hero-read svg{width:26px;height:26px;animation:bob 1.6s ease-in-out infinite}
 
@@ -285,7 +285,6 @@
         <svg class="hero-logo" viewBox="0 0 220 220" aria-hidden="true"><use href="#lk-logo"/></svg>
         <h1 class="hero-brand">LOOKTURA</h1>
         <p class="hero-partners">партнёрам</p>
-        <p class="hero-tagline">Доведём покупателя до вашей&nbsp;двери</p>
         <span class="hero-read" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </span>
