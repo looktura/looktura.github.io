@@ -3,7 +3,7 @@
 // synced captions + dots, nav, FAQ, waitlist, scroll reveals.
 // Graceful fallback when reduced-motion is set or WebGL is unavailable.
 
-import { createPhoneCarousel } from './phone.js?v=110';
+import { createPhoneCarousel } from './phone.js?v=111';
 
 const SCREENS = [
   { url: 'assets/screens/swipe.jpg',   focus: 'center', t: 'Каталог или Лента',   s: 'Свайпай или листай, как удобно' },
@@ -188,13 +188,20 @@ async function init3D() {
     });
 
     // ---- magnetic snap ------------------------------------------------------
-    // Once a scroll settles inside the pinned hero, gently ease the ring to the
-    // nearest phone so it's easy to stop with a screen dead-on. Driven through
-    // Lenis (not ScrollTrigger.snap) so it never fights the smooth scroll.
+    // Two-stage magnet, driven through Lenis (not ScrollTrigger.snap) so it never
+    // fights the smooth scroll:
+    //   1) EARLY GRAB — once a real swipe has spent its energy and is coasting,
+    //      grab the tail of the glide and pull it into the nearest phone. This is
+    //      the "magnet" you actually feel.
+    //   2) STOP BACKSTOP — whatever's left, snap once the scroll fully settles.
+    // Velocity scale (measured): active swipe ~600-1100, coasting decays ~200->20->0.
     {
       const easeOut = (x) => 1 - Math.pow(1 - x, 3);
-      let snapTimer, snapTarget = null;
-      const trySnap = () => {
+      const FLICK_V = 250;   // above this = an intentional swipe in progress
+      const GRAB_V  = 150;   // once the swipe decays to here, grab the coast
+      let snapTimer, snapTarget = null, flicked = false;
+
+      const snapNow = () => {
         const st = window.__heroST;
         if (!st) return;
         const cur = (lenis.scroll ?? window.scrollY);
@@ -202,17 +209,30 @@ async function init3D() {
         const span = st.end - st.start;
         if (span <= 0) return;
         const step = span / N;
-        const target = st.start + Math.round((cur - st.start) / step) * step;
+        const ref = lenis.targetScroll ?? cur;                           // project where momentum is heading
+        const target = st.start + Math.round((ref - st.start) / step) * step;
         const dist = Math.abs(target - cur);
         if (dist < 2) { snapTarget = null; return; }                     // already resting on a phone
         if (target === snapTarget) return;                               // already easing to this phone
         snapTarget = target;
-        // scale the glide with distance so a mid-position correction reads as a clear magnetic pull
-        const dur = 0.3 + 0.4 * Math.min(1, dist / (step / 2));
-        lenis.scrollTo(target, { duration: dur, easing: easeOut, force: true, lock: true });
+        const dur = 0.3 + 0.4 * Math.min(1, dist / (step / 2));          // longer glide for bigger pulls
+        lenis.scrollTo(target, { duration: dur, easing: easeOut, force: true });
       };
-      // fire promptly once the scroll pauses (debounced), so it never fights an active swipe
-      lenis.on('scroll', () => { clearTimeout(snapTimer); snapTimer = setTimeout(trySnap, 45); });
+
+      lenis.on('scroll', () => {
+        const st = window.__heroST;
+        const cur = (lenis.scroll ?? window.scrollY);
+        const inHero = st && cur >= st.start - 2 && cur <= st.end + 2;
+        const v = Math.abs(lenis.velocity ?? 0);
+        if (snapTarget === null) {                    // don't interfere while a snap is already easing
+          if (!inHero) flicked = false;
+          else if (v > FLICK_V) flicked = true;                          // a real swipe is under way
+          else if (flicked && v <= GRAB_V) { flicked = false; snapNow(); } // grab the coasting tail
+        }
+        // backstop: snap once the scroll fully settles (covers slow scrolls that never flicked)
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(snapNow, 40);
+      });
     }
 
     initAnchors(lenis);
