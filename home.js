@@ -3,20 +3,20 @@
 // synced captions + dots, nav, FAQ, waitlist, scroll reveals.
 // Graceful fallback when reduced-motion is set or WebGL is unavailable.
 
-import { createPhoneCarousel } from './phone.js?v=112';
+import { createPhoneCarousel } from './phone.js?v=113';
 
 const SCREENS = [
-  { url: 'assets/screens/swipe.jpg',   focus: 'center', t: 'Каталог или Лента',   s: 'Свайпай или листай, как удобно' },
-  { url: 'assets/screens/matches.jpg', focus: 'center', t: 'Твои мэтчи',           s: 'Всё, что зацепило, в одном месте' },
-  { url: 'assets/screens/booking.jpg', focus: 'center', t: 'Бронь товара',         s: 'Бронируешь примерку прямо из карточки' },
-  { url: 'assets/screens/catalog.jpg', focus: 'center', t: 'Каталог товаров',      s: 'Весь ассортимент магазина под рукой' },
-  { url: 'assets/screens/route.jpg',   focus: 'center', t: 'Построение маршрута',  s: 'Шопинг-тур по нескольким бутикам', glow: true },
-  { url: 'assets/screens/home.jpg',    focus: 'center', t: 'Всё в одном экране',   s: 'Лента, мэтчи, брони и маршруты' },
+  { url: 'assets/screens/swipe.jpg',   focus: 'center', t: 'Лента вещей',          s: 'Всё в наличии, всё рядом' },
+  { url: 'assets/screens/matches.jpg', focus: 'center', t: 'Твои мэтчи',           s: 'Что зацепило, то не потеряется' },
+  { url: 'assets/screens/booking.jpg', focus: 'center', t: 'Бронь примерки',       s: 'Возвратные 5%, и вещь отложена' },
+  { url: 'assets/screens/catalog.jpg', focus: 'center', t: 'Каталог магазина',     s: 'Размеры, цены, наличие: без звонков' },
+  { url: 'assets/screens/route.jpg',   focus: 'center', t: 'Маршрут по бутикам',   s: 'Город вместо пункта выдачи', glow: true },
+  { url: 'assets/screens/home.jpg',    focus: 'center', t: 'Всё в одном',          s: 'Лента, мэтчи, брони и маршруты' },
 ];
 
 // 7th stop: the first phone re-skins to wishlists while it is turned away,
 // so finishing the scroll reveals a new screen instead of repeating screen 1.
-const WISHLISTS = { url: 'assets/screens/wishlists.jpg', focus: 'center', t: 'Вишлисты', s: 'Собирай и делись с друзьями' };
+const WISHLISTS = { url: 'assets/screens/wishlists.jpg', focus: 'center', t: 'Твои вишлисты', s: 'Собирай подборки, делись с друзьями' };
 const CAPS = [...SCREENS.map((s) => ({ t: s.t, s: s.s, glow: s.glow })), { t: WISHLISTS.t, s: WISHLISTS.s }];
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -101,6 +101,121 @@ function initWaitlist() {
       location.href = `mailto:${cfg.email}?subject=Ранний доступ LOOKTURA&body=Запишите меня в ранний доступ: ${encodeURIComponent(email)}`;
       form.reset();
     }
+  });
+}
+
+/* -------------------------------------------------- line-reveal titles */
+// Wrap each <br>-separated line of the big section titles in a masked span:
+// the existing .rv observer then slides the lines up from under the mask.
+function initLineReveal() {
+  if (reduce) return;
+  $$('.lenta .sec__title, .boutiques .sec__title, .why .sec__title, .start .sec__title').forEach((h) => {
+    const parts = h.innerHTML.split(/<br\s*\/?>/i).map((s) => s.trim()).filter(Boolean);
+    if (!parts.length) return;
+    h.innerHTML = parts.map((p) => `<span class="line"><span class="line__in">${p}</span></span>`).join('');
+  });
+}
+
+/* -------------------------------------- scroll-scrubbed section motion */
+// Needs gsap + ScrollTrigger — called only from the Lenis branch of init3D.
+function initSectionMotion() {
+  const gsap = window.gsap;
+  if (!gsap || !window.ScrollTrigger) return;
+
+  // the define manifesto reads itself word by word as you scroll past it
+  const t = $('.define__t');
+  if (t) {
+    const words = t.textContent.trim().split(/\s+/);
+    t.setAttribute('aria-label', t.textContent.trim());
+    t.innerHTML = words.map((w) => `<span class="w" aria-hidden="true">${w}</span>`).join(' ');
+    gsap.fromTo('.define__t .w', { opacity: 0.16 }, {
+      opacity: 1, ease: 'none', stagger: 0.35,
+      scrollTrigger: { trigger: '.define', start: 'top 78%', end: 'top 32%', scrub: 0.5 },
+    });
+  }
+
+  // the final CTA card "docks" into place, tied to the scroll
+  if ($('.final__card')) {
+    gsap.fromTo('.final__card', { y: 36, scale: 0.97, opacity: 0 }, {
+      y: 0, scale: 1, opacity: 1, ease: 'none',
+      scrollTrigger: { trigger: '.final', start: 'top 88%', end: 'top 45%', scrub: 0.6 },
+    });
+  }
+}
+
+/* --------------------------------------- lookbook rail: drag + cursor */
+function initFeedDrag() {
+  const feed = $('.feed');
+  if (!feed || !matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  let down = false, startX = 0, startScroll = 0, vel = 0, lastX = 0, lastT = 0, raf = 0;
+  feed.addEventListener('pointerdown', (e) => {
+    down = true; feed.classList.add('is-drag');
+    startX = e.clientX; startScroll = feed.scrollLeft; lastX = e.clientX; lastT = performance.now();
+    cancelAnimationFrame(raf);
+    feed.setPointerCapture(e.pointerId);
+  });
+  feed.addEventListener('pointermove', (e) => {
+    if (!down) return;
+    feed.scrollLeft = startScroll - (e.clientX - startX);
+    const now = performance.now();
+    vel = (e.clientX - lastX) / Math.max(now - lastT, 1) * 16;
+    lastX = e.clientX; lastT = now;
+  });
+  const end = () => {
+    if (!down) return;
+    down = false;
+    const step = () => {                       // let go — coast on inertia
+      vel *= 0.94; feed.scrollLeft -= vel;
+      if (Math.abs(vel) > 0.3) raf = requestAnimationFrame(step);
+      else feed.classList.remove('is-drag');
+    };
+    raf = requestAnimationFrame(step);
+  };
+  feed.addEventListener('pointerup', end);
+  feed.addEventListener('pointercancel', end);
+}
+
+// a glass "drag me" pill that floats after the cursor over the rail
+function initFeedCursor() {
+  if (reduce || !matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  const gsap = window.gsap;
+  const feed = $('.feed');
+  if (!feed || !gsap) return;
+  const tip = document.createElement('div');
+  tip.className = 'ctip glass';
+  tip.setAttribute('aria-hidden', 'true');
+  tip.innerHTML = '<span>←</span>тяни<span>→</span>';
+  document.body.appendChild(tip);
+  gsap.set(tip, { xPercent: -50, yPercent: -120, scale: 0.6 });
+  const qx = gsap.quickTo(tip, 'x', { duration: 0.35, ease: 'power3' });
+  const qy = gsap.quickTo(tip, 'y', { duration: 0.35, ease: 'power3' });
+  feed.addEventListener('pointermove', (e) => { qx(e.clientX); qy(e.clientY); }, { passive: true });
+  feed.addEventListener('pointerenter', (e) => {
+    gsap.set(tip, { x: e.clientX, y: e.clientY });
+    gsap.to(tip, { opacity: 1, scale: 1, duration: 0.25, ease: 'power2.out' });
+  });
+  feed.addEventListener('pointerleave', () => gsap.to(tip, { opacity: 0, scale: 0.6, duration: 0.2 }));
+  feed.addEventListener('pointerdown', () => gsap.to(tip, { scale: 0.8, duration: 0.15 }));
+  window.addEventListener('pointerup', () => gsap.to(tip, { scale: 1, duration: 0.2 }));
+}
+
+/* ---------------------------------------------------------- scrollspy */
+// keeps the nav's gradient underline on the section currently in view
+function initScrollSpy() {
+  const links = $$('.nav__links a[href^="#"]');
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  const byId = Object.fromEntries(links.map((a) => [a.getAttribute('href').slice(1), a]));
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      links.forEach((a) => a.classList.remove('active'));
+      const link = byId[e.target.id];
+      if (link) link.classList.add('active');
+    });
+  }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+  Object.keys(byId).forEach((id) => {
+    const s = document.getElementById(id);
+    if (s) obs.observe(s);
   });
 }
 
@@ -252,6 +367,7 @@ async function init3D() {
     }
 
     initAnchors(lenis);
+    initSectionMotion();
     car.ready.then(async () => {
       swTex = car.screenTexture(0);
       wlTex = await car.loadTexture(WISHLISTS.url, WISHLISTS.focus);
@@ -311,7 +427,11 @@ function initAnchors(lenis) {
 function boot() {
   initFaq();
   initWaitlist();
+  initLineReveal();      // must wrap the titles before the .rv observer fires
   initReveals();
+  initFeedDrag();
+  initFeedCursor();
+  initScrollSpy();
   if (hasWebGL) init3D(); else initFallback();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
