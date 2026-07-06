@@ -14,6 +14,7 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -252,7 +253,12 @@ export function createDiorama(container, opts = {}) {
 
   // ---- store -------------------------------------------------------------
   const STORE_YAW = -Math.PI / 2;
-  let storeTopY = 2.5, storeGroup = null; const onReadyCbs = []; const loader = new GLTFLoader(); let disposed = false;
+  let storeTopY = 2.5, storeGroup = null; const onReadyCbs = []; let disposed = false;
+  // the GLB ships Draco-compressed geometry; decoder pinned to our three version
+  const loader = new GLTFLoader();
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/');
+  loader.setDRACOLoader(draco);
   const ready = loader.loadAsync(storeUrl).then((gl) => {
     if (disposed) return api;
     const m = gl.scene; m.updateMatrixWorld(true);

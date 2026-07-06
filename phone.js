@@ -13,6 +13,7 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const SCREEN_ASPECT = 0.462; // iPhone display w/h
@@ -91,6 +92,10 @@ export function createPhoneCarousel(container, opts = {}) {
 
   // ---- build ring --------------------------------------------------------
   const loader = new GLTFLoader();
+  // the GLB ships Draco-compressed geometry; decoder pinned to our three version
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/');
+  loader.setDRACOLoader(draco);
   let disposed = false;
   const onReadyCbs = [];
 

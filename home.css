@@ -34,9 +34,12 @@
 
 *{box-sizing:border-box}
 html{ -webkit-text-size-adjust:100%; }
+/* type system: Mulish carries the reading voice, Montserrat carries the
+   headlines, Merriweather italic is the editorial accent (3 spots), and the
+   LOOKTURA wordmark keeps its own fixed SF Pro stack. */
 body{
   margin:0;
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-family:Mulish,Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   color:var(--ink);
   background:var(--ivory);
   line-height:1.5;
@@ -118,12 +121,16 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
 
 /* ---- type helpers ---------------------------------------- */
 .eyebrow{
-  font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  font-family:Montserrat,Mulish,sans-serif;
+  font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
   color:var(--accent-deep);margin-bottom:16px;
 }
 .sec__head{max-width:760px;margin:0 auto 56px;text-align:center}
+.sec__title,.final__title,.forstores__t,.step__k,.ringcap__t{
+  font-family:Montserrat,Mulish,sans-serif;
+}
 .sec__title{
-  font-size:clamp(30px,4.6vw,52px);font-weight:800;letter-spacing:-.025em;line-height:1.04;
+  font-size:clamp(30px,4.6vw,52px);font-weight:800;letter-spacing:-.025em;line-height:1.06;
 }
 .sec__lead{margin-top:18px;color:var(--muted);font-size:clamp(16px,1.6vw,19px);line-height:1.6}
 
@@ -140,7 +147,8 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
 .nav__pill{display:flex;align-items:center;gap:22px;padding:9px 9px 9px 18px;border-radius:999px;width:min(960px,100%)}
 .nav__logo{display:flex;align-items:center;gap:10px}
 .nav__logo .mark{width:26px;height:26px;filter:drop-shadow(0 2px 4px rgba(17,16,16,.16))}
-.nav__word{font-weight:800;letter-spacing:.14em;font-size:15px}
+.nav__word{font-family:"SF Pro Display","SF Pro Text",-apple-system,BlinkMacSystemFont,Inter,sans-serif;
+  font-weight:800;letter-spacing:.14em;font-size:15px}
 .nav__links{display:flex;gap:24px;margin-left:auto}
 .nav__links a{position:relative;font-size:14.5px;font-weight:500;color:var(--ink);opacity:.78;transition:opacity .2s}
 .nav__links a:hover{opacity:1}
@@ -174,7 +182,9 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
   -webkit-background-clip:text;background-clip:text;
   color:transparent;-webkit-text-fill-color:transparent;
 }
-.hero__sub{margin:10px auto 0;max-width:420px;color:var(--muted);font-size:clamp(15px,1.7vw,19px);font-weight:500}
+.hero__sub{margin:12px auto 0;max-width:460px;color:#5F5850;
+  font-family:Merriweather,Georgia,serif;font-style:italic;font-weight:400;
+  font-size:clamp(16px,1.8vw,20px);letter-spacing:.01em}
 
 .ringcap{
   position:absolute;left:0;right:0;bottom:clamp(60px,8vh,88px);z-index:3;
@@ -260,6 +270,7 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
   box-shadow:0 26px 56px rgba(110,90,130,.22);opacity:0;transition:opacity .35s;pointer-events:none}
 /* big gradient step numeral, top-right */
 .step::before{content:"0" counter(step);position:absolute;top:22px;right:26px;
+  font-family:Montserrat,Mulish,sans-serif;
   font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1;
   background:linear-gradient(110deg,#EB74F4,#9A77EE 55%,#46AEE8);
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
@@ -276,8 +287,9 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
 
 /* 2 · definition strip — the manifesto reads itself word by word (scrub) */
 .define{text-align:center}
-.define__t{max-width:840px;margin:0 auto;padding:0 20px;font-size:clamp(19px,2.4vw,28px);font-weight:600;
-  letter-spacing:-.02em;line-height:1.34;color:#2a2724;opacity:1}
+.define__t{max-width:840px;margin:0 auto;padding:0 20px;
+  font-family:Merriweather,Georgia,serif;font-style:italic;font-weight:400;
+  font-size:clamp(19px,2.3vw,27px);letter-spacing:0;line-height:1.5;color:#2a2724;opacity:1}
 .define__t .w{display:inline-block;will-change:opacity}
 
 /* 4 · лента — label-free lookbook rail (draggable on desktop) */
@@ -303,8 +315,9 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
 /* 5 · бутики */
 .boutiques__grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(32px,5vw,64px);align-items:center}
 .boutiques__copy .sec__lead{margin-top:16px}
-.boutiques__amp{margin-top:24px;font-size:clamp(17px,1.8vw,21px);font-weight:600;
-  letter-spacing:-.01em;color:var(--accent-deep);max-width:48ch}
+.boutiques__amp{margin-top:24px;font-size:clamp(17px,1.9vw,22px);
+  font-family:Merriweather,Georgia,serif;font-style:italic;font-weight:400;
+  letter-spacing:0;line-height:1.5;color:var(--accent-deep);max-width:44ch}
 .boutiques__card{border-radius:var(--r-lg);padding:clamp(26px,3vw,38px)}
 .bgroup + .bgroup{margin-top:22px}
 .bgroup h4{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:13px}
@@ -387,7 +400,7 @@ a:focus-visible{outline:2px solid var(--accent-deep);outline-offset:3px;border-r
   opacity:0;visibility:hidden;transition:.35s}
 .menu.open{opacity:1;visibility:visible}
 .menu__nav{display:flex;flex-direction:column;gap:6px}
-.menu__nav a{font-size:32px;font-weight:800;letter-spacing:-.02em;padding:10px 0;
+.menu__nav a{font-family:Montserrat,Mulish,sans-serif;font-size:30px;font-weight:800;letter-spacing:-.02em;padding:10px 0;
   opacity:0;transform:translateY(16px);
   transition:opacity .45s cubic-bezier(.16,1,.3,1),transform .45s cubic-bezier(.16,1,.3,1)}
 .menu.open .menu__nav a{opacity:1;transform:none}
